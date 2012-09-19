@@ -1,7 +1,10 @@
 package hr.gdd.puzzle.gage.demo;
 
+import java.util.ArrayList;
+
 import org.cocos2d.nodes.CCDirector;
 import org.cocos2d.opengl.CCGLSurfaceView;
+import org.cocos2d.types.CGRect;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -9,8 +12,22 @@ import android.view.Window;
 import android.view.WindowManager;
 
 public class Game extends Activity {
-	protected CCGLSurfaceView _glSurfaceView;
+	//Constants
+	private static final int DEF_LTIME = 60;
 	
+	//Fields
+	private CCGLSurfaceView _glSurfaceView;
+	private CGRect _screenBounds;
+	private ArrayList<Level> _levels;
+	private int _currLevel = 0;
+	
+	//Constructor
+	public Game()
+	{
+		this._levels = new ArrayList<Level>();
+	}
+	
+	//Default methods
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,5 +78,29 @@ public class Game extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+    
+    //Add a level
+    public void AddLevel(Level l)
+    {
+    	this._levels.add(l);
+    }
+    
+    //Clear all levels
+    public void ClearLevels()
+    {
+    	this._levels.clear();
+    }
+    
+    //Start the current level
+    public void StartCurrentLevel()
+    {
+    	//
+    }
+    
+    //Go to the next level
+    public void NextLevel()
+    {
+    	//
     }
 }
