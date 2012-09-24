@@ -2,12 +2,15 @@ package hr.gdd.puzzle.gage.demo;
 
 import java.util.ArrayList;
 
+import org.cocos2d.layers.CCLayer;
+import org.cocos2d.layers.CCScene;
 import org.cocos2d.nodes.CCDirector;
 import org.cocos2d.opengl.CCGLSurfaceView;
-import org.cocos2d.types.CGRect;
+import org.cocos2d.types.CGPoint;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -17,7 +20,6 @@ public class Game extends Activity {
 	
 	//Fields
 	private CCGLSurfaceView _glSurfaceView;
-	private CGRect _screenBounds;
 	private ArrayList<Level> _levels;
 	private int _currLevel = 0;
 	
@@ -40,6 +42,8 @@ public class Game extends Activity {
         //Create a new CCGLSurfaceView instance and make it the content window for the game
         _glSurfaceView = new CCGLSurfaceView(this);
         setContentView(_glSurfaceView);
+        
+        Log.d("Dave", "HASHSHASKD");
     }
     
     @Override
@@ -52,6 +56,38 @@ public class Game extends Activity {
         //Display FPS and set the animation interval for the game
         CCDirector.sharedDirector().setDisplayFPS(true);
         CCDirector.sharedDirector().setAnimationInterval(1.0f/60.0f);
+        
+        //Factories used to create the blocks
+        AlienBlockFactory afac = new AlienBlockFactory();
+        
+        //Blocks list
+        ArrayList<BlockConfig> blocksL1 = new ArrayList<BlockConfig>();
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 0), "Crazy", afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 1), "Crazy", afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 2), "Nerdy", afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 3), "Nerdy", afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 4), "Nerdy", afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 5), "Nerdy", afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 6), "Nerdy", afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 7), "Nerdy", afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 8), "Nerdy", afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), "Nerdy", afac));
+        
+        //Display elements
+        ArrayList<PGButton> normalButtons = new ArrayList<PGButton>();
+        normalButtons.add(new PGButton());
+        
+        PGDisplay normalDisplay = new PGDisplay(normalButtons);
+        Background normalBack = new Background();
+        BlockField normalField = new BlockField(CGPoint.ccp(6, 10));
+        
+        //Create the levels
+        Level newLevel1 = new Level(normalBack, normalField, normalDisplay, this);
+        newLevel1.addConfig(blocksL1);
+        
+        //Add the levels
+        this.AddLevel(newLevel1);
+        this.StartCurrentLevel();
     }
 
     @Override
@@ -95,7 +131,20 @@ public class Game extends Activity {
     //Start the current level
     public void StartCurrentLevel()
     {
-    	//
+    	//Abort the function if there are no levels
+    	if(this._levels.size() == 0) return;
+    	
+    	//Make sure a level is targetted
+    	Level currLevel = this._levels.get(this._currLevel);
+    	
+    	if(currLevel != null)
+    	{
+    		CCScene levelScene = CCScene.node();
+    		levelScene.addChild(currLevel);
+    		
+    		currLevel.setup(Orientation.IPortrait);
+    		CCDirector.sharedDirector().runWithScene(levelScene);
+    	}
     }
     
     //Go to the next level
