@@ -48,6 +48,11 @@ public class PGDisplay
 		this._buttons.add(button);
 	}
 	
+	//Overload for adding multiple buttons to the display at once
+	public void AddButton(ArrayList<PGButton> buttons) {
+		this._buttons.addAll(buttons);
+	}
+	
 	//Clear all buttons
 	public void ClearButtons()
 	{

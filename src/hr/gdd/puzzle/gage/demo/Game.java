@@ -26,6 +26,7 @@ public class Game extends Activity {
 	//Constructor
 	public Game()
 	{
+		//Initialize the level list
 		this._levels = new ArrayList<Level>();
 	}
 	
@@ -42,8 +43,6 @@ public class Game extends Activity {
         //Create a new CCGLSurfaceView instance and make it the content window for the game
         _glSurfaceView = new CCGLSurfaceView(this);
         setContentView(_glSurfaceView);
-        
-        Log.d("Dave", "HASHSHASKD");
     }
     
     @Override
@@ -60,20 +59,23 @@ public class Game extends Activity {
         //Factories used to create the blocks
         AlienBlockFactory afac = new AlienBlockFactory();
         
-        //Blocks list
+        //Block configurators list
         ArrayList<BlockConfig> blocksL1 = new ArrayList<BlockConfig>();
-        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 0), "Crazy", afac));
-        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 1), "Crazy", afac));
-        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 2), "Nerdy", afac));
-        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 3), "Nerdy", afac));
-        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 4), "Nerdy", afac));
-        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 5), "Nerdy", afac));
-        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 6), "Nerdy", afac));
-        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 7), "Nerdy", afac));
-        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 8), "Nerdy", afac));
-        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), "Nerdy", afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 0), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 0), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 9), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 1), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 2), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 2), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 3), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 4), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 6), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 7), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 8), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Rocky, afac));
         
-        //Display elements
+        //Create the display elements to be used in the level
         ArrayList<PGButton> normalButtons = new ArrayList<PGButton>();
         normalButtons.add(new PGButton());
         
@@ -83,10 +85,14 @@ public class Game extends Activity {
         
         //Create the levels
         Level newLevel1 = new Level(normalBack, normalField, normalDisplay, this);
+        
+        //Add the configurators to the level
         newLevel1.addConfig(blocksL1);
         
-        //Add the levels
+        //Add the levels to the game
         this.AddLevel(newLevel1);
+        
+        //Start the level that is currently chosen for the game
         this.StartCurrentLevel();
     }
 
@@ -94,6 +100,7 @@ public class Game extends Activity {
     public void onPause() {
         super.onPause();
         
+        //Pause the Cocos2D director when the activity pauses
         CCDirector.sharedDirector().pause();
     }
 
@@ -101,6 +108,7 @@ public class Game extends Activity {
     public void onResume() {
         super.onResume();
         
+        //Resume the Cocos2D director when the activity resumes
         CCDirector.sharedDirector().resume();
     }
     
@@ -108,6 +116,7 @@ public class Game extends Activity {
     public void onStop() {
     	super.onStop();
     	
+    	//Stop the Cocos2D director when the activity stops
     	CCDirector.sharedDirector().end();
     }
     
@@ -116,40 +125,29 @@ public class Game extends Activity {
         super.onDestroy();
     }
     
-    //Add a level
+    //Add a level to the game's list of levels
     public void AddLevel(Level l)
     {
     	this._levels.add(l);
     }
     
-    //Clear all levels
-    public void ClearLevels()
-    {
-    	this._levels.clear();
-    }
-    
-    //Start the current level
+    //Start the currently selected level of the game
     public void StartCurrentLevel()
     {
-    	//Abort the function if there are no levels
-    	if(this._levels.size() == 0) return;
+    	//Abort the method if the current level index exceeds the number of levels
+    	if(this._currLevel+1 > this._levels.size()) return;
     	
-    	//Make sure a level is targetted
+    	//Obtain the currently selected level
     	Level currLevel = this._levels.get(this._currLevel);
     	
-    	if(currLevel != null)
-    	{
-    		CCScene levelScene = CCScene.node();
-    		levelScene.addChild(currLevel);
-    		
-    		currLevel.setup(Orientation.IPortrait);
-    		CCDirector.sharedDirector().runWithScene(levelScene);
-    	}
-    }
-    
-    //Go to the next level
-    public void NextLevel()
-    {
-    	//
+    	//Create a new scene and put the level in it
+		CCScene levelScene = CCScene.node();
+		levelScene.addChild(currLevel);
+		
+		//Put the newly added level in its setup phase, passing along a screen orientation
+		currLevel.setup(Orientation.IPortrait);
+		
+		//Run the scene containing the newly added level
+		CCDirector.sharedDirector().runWithScene(levelScene);
     }
 }

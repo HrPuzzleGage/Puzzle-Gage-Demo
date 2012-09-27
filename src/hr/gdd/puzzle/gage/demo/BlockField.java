@@ -1,262 +1,376 @@
 package hr.gdd.puzzle.gage.demo;
 
 import java.util.ArrayList;
+import java.util.Observable;
 
-import org.cocos2d.nodes.CCDirector;
+import org.cocos2d.actions.instant.CCCallFuncN;
+import org.cocos2d.actions.instant.CCCallFuncND;
+import org.cocos2d.actions.interval.CCMoveTo;
+import org.cocos2d.actions.interval.CCSequence;
 import org.cocos2d.nodes.CCSprite;
 import org.cocos2d.types.CGPoint;
 import org.cocos2d.types.CGRect;
 import org.cocos2d.types.CGSize;
+
 import android.util.Log;
 
-public class BlockField 
+public class BlockField extends Observable
 {
-	//Fields
+	//-----------------Fields
 	private Block[][] _blocks;
-	private CGRect _fieldBounds;
 	private Block[] _switching;
 	private CCSprite _sprite;
+	private CGSize _size;
 	private CGPoint _dims;
 	private Orientation _lastOrientation;
+	private int _falling = 0;
 	
-	//Constructor
+	//-----------------Constructor
 	public BlockField(CGPoint griddims)
 	{
-		//Set the texture
+		//Set the texture to be used for the sprite
 		this._sprite = CCSprite.sprite("blockfield.png");
-		this._sprite.setAnchorPoint(0.0f, 1.0f);
 		
 		//Last orientation
-		_lastOrientation = Orientation.Portrait;
+		this._lastOrientation = Orientation.Portrait;
 		
-		//Initialize the new blocks array
+		//Initialize the new blocks array based on the supplied dimensions
 		this._dims = griddims;
 		this._blocks = new Block[(int) griddims.x][(int) griddims.y];
 	}
 	
-	//Scale to a fixed width and height, keeping an eye on the dimensions of the field
-	public void scaleField(float largestSize, float padding, String orientation)
+	//-----------------Getter Methods
+	//Get the dimensions for the block field (how many by how many blocks there are)
+	public CGPoint getDimensions()
 	{
-		float theX = 0.0f;
-		float theY = 0.0f;
-		
-		if(this._dims.x > this._dims.y) 
-		{
-			theX = largestSize;
-			theY = this._dims.y * (largestSize/this._dims.x);
-		} 
-		else 
-		{
-			theX = this._dims.x * (largestSize/this._dims.y);
-			theY = largestSize;
-		}
-		
-		if(orientation == "portrait")
-		{
-			float constraint = CCDirector.sharedDirector().displaySize().width - (padding*2);
-			if(theX > constraint) theX = constraint;
-		} 
-		else 
-		{
-			float constraint = CCDirector.sharedDirector().displaySize().height - (padding*2);
-			if(theY > constraint) theY = constraint;
-		}
-		
-		CGSize theSize = CGSize.make(theX, theY);
-		
-		float newWidth = theSize.width;
-	    float newHeight = theSize.height;
-	    float startWidth = this._sprite.getContentSize().width;
-	    float startHeight = this._sprite.getContentSize().height;
-	    float newScaleX = newWidth/startWidth;
-	    float newScaleY = newHeight/startHeight;
-
-	    this._sprite.setScaleX(newScaleX);
-	    this._sprite.setScaleY(newScaleY);
-	    this._sprite.setAnchorPoint(0.0f, 1.0f);
+		return this._dims;
 	}
 	
-	//Obtaining the scaled size of the associated sprite
-	public CGPoint getAbsoluteSize()
+	//Obtain the scaled size of the associated sprite (this excludes any rotations)
+	public CGSize getAbsoluteSpriteSize()
 	{
-		return CGPoint.ccp(this._sprite.getScaleX()*this._sprite.getContentSize().width, this._sprite.getScaleY()*this._sprite.getContentSize().height);
+		return this._size;
 	}
 	
-	//Getter methods
+	//Obtain the sprite used as a background for the block field
 	public CCSprite getSprite()
 	{
 		return this._sprite;
 	}
 	
-	public CGRect getFieldBounds() 
-	{
-		return _fieldBounds;
-	}
-	
-	//Setter methods
-	public void setFieldBounds(CGRect fieldBounds) 
-	{
-		this._fieldBounds = fieldBounds;
-	}
-	
-	//Setup all the blocks in the field using the current grid
-	public ArrayList<CCSprite> SetupBlocks(ArrayList<BlockConfig> blocks)
+	//Gets the sprites of all the blocks to return
+	public ArrayList<CCSprite> getBlockSprites()
 	{
 		ArrayList<CCSprite> sprites = new ArrayList<CCSprite>();
 		
-		for(BlockConfig bc : blocks)
+		//Iterate over all blocks in the grid
+		for(Block[] b : this._blocks) for(Block bb : b)
 		{
-			Block newBlock = bc.obtainBlock();
-			CGPoint gridPos = TransformBlockPosition(bc.getPosition());
-			
-			float newBlockW = (this.getAbsoluteSize().y/this._dims.x);
-			float newBlockH = (this.getAbsoluteSize().x/this._dims.y);
-			
-			//this._sprite.addChild(newBlock.getSprite());
-			newBlock.resize(CGSize.make(newBlockW, newBlockH));
-			newBlock.getSprite().setPosition(gridPos.x*newBlockW, gridPos.y*newBlockH);
-			
-			sprites.add(newBlock.getSprite());
-		} 
+			//If there is an existent block instance, add it to the list of sprites to return
+			if(bb != null) sprites.add(bb.getSprite());
+		}
 		
 		return sprites;
 	}
 	
-	private CGPoint TransformBlockPosition(CGPoint oldPosition)
+	//-----------------Setter Methods
+	public void setOrientation(Orientation orientation)
 	{
-		if(this._lastOrientation == Orientation.Portrait) return oldPosition;
+		if(this._lastOrientation == orientation) return;
 		
-		CGPoint newPosition = CGPoint.zero();
-		if(this._lastOrientation == Orientation.IPortrait)
-		{
-			newPosition = CGPoint.ccp(this._dims.x-oldPosition.x, this._dims.y-oldPosition.y);
-		}
-		else if(this._lastOrientation == Orientation.Landscape)
-		{
-			newPosition = CGPoint.ccp(oldPosition.y, this._dims.x-oldPosition.x);
-		}
-		else if(this._lastOrientation == Orientation.ILandscape)
-		{
-			newPosition = CGPoint.ccp(this._dims.y-oldPosition.y, oldPosition.x);
-		}
+		this._lastOrientation = orientation;
 		
-		return newPosition;
+		//Rotation
+		float newRotation = this.orientationToRotation(orientation);
+		
+		//Iterate over all blocks in the grid, setting new values for them
+		for(Block[] b : this._blocks) for(Block bb : b)
+		{
+			if(bb != null) bb.getSprite().setRotation(newRotation);
+		}
 	}
 	
-	//Based off of the orientation, transform the grid along with the blocks within
-	public void TransformGrid(Orientation orientation)
+	//-----------------Methods
+	//Scale the sprite to a fixed width and height, keeping an eye on the dimensions of the field
+	//Remember that if the aspect ratio is the opposite of that of the desired size, the sprite is rotated!
+	public void resizeIndividualAxes(CGSize newSize, CGSize currSize, CGPoint constraint)
 	{
-		//Abort if the last orientation equals the current
-		if(orientation == this._lastOrientation) return;
+		//Decide longest and shortest axis of both passed size and constraint
+		float longestPassed = Math.max(newSize.width, newSize.height);
+		float shortestPassed = Math.min(newSize.width, newSize.height);
+		float longestDims = Math.max(constraint.x, constraint.y);
+		float shortestDims = Math.min(constraint.x, constraint.y);
 		
-		int maxhor = (int) _dims.x;
-		int maxvert = (int) _dims.y;
-		boolean wasFlat = this._lastOrientation == Orientation.Landscape || this._lastOrientation == Orientation.ILandscape;
+		//Set the shortest side taking the proportions into account 
+		float longSteps = longestPassed/longestDims;
+		float finalLong = longestPassed;
+		float finalShort = longSteps * shortestDims;
 		
-		//Create a temporary array to store the blocks in
-		Block[][] tempArray = new Block[wasFlat ? maxvert : maxhor][wasFlat ? maxhor : maxvert];
-		
-		//Map everything into a new array
-		if(this._lastOrientation == Orientation.Portrait)
+		//Scale the whole result if the shortest side exceeds the newly set size
+		if(finalShort > shortestPassed)
 		{
-			for(int i = 0; i <  maxhor; i++) for(int j = 0; j < maxvert; j++)
-			{
-				tempArray[i][j] = this._blocks[i][j];
-			}
-		}
-		else if(this._lastOrientation == Orientation.IPortrait)
-		{
-			for(int i = maxhor-1; i >= 0; i--) for(int j = maxvert-1; j >= 0; j--)
-			{
-				tempArray[maxhor-1-i][maxvert-1-j] = this._blocks[i][j];
-			}
-		} 
-		else if (this._lastOrientation == Orientation.Landscape)
-		{
-			for(int j = maxvert-1; j >= 0; j--) for(int i = 0; i < maxhor; i++)
-			{
-				tempArray[maxvert-1-j][i] = this._blocks[i][j];
-			}
-		}
-		else if(this._lastOrientation == Orientation.ILandscape)
-		{
-			for(int j = 0; j < maxvert; j++) for(int i = maxhor-1; i >= 0; i--)
-			{
-				tempArray[j][maxhor-1-i] = this._blocks[i][j];
-			}
+			float scaleFactor = shortestPassed/finalShort;
+			finalLong *= scaleFactor;
+			finalShort *= scaleFactor;
 		}
 		
-		//Reset the dimensions if needed
-		if(((this._lastOrientation == Orientation.Portrait || this._lastOrientation == Orientation.IPortrait) && (orientation == Orientation.Landscape || orientation == Orientation.ILandscape)) ||
-				((this._lastOrientation == Orientation.Landscape || this._lastOrientation == Orientation.ILandscape) && (orientation == Orientation.Portrait || orientation == Orientation.IPortrait)))
-		{
-			float newX = this._dims.y;
-			float newY = this._dims.x;
-			this._dims = CGPoint.ccp(newX, newY);
-		}
+		//Scale the sprite
+		float newX = currSize.width <= currSize.height ? finalShort : finalLong;
+		float newY = currSize.height < currSize.width ? finalShort : finalLong;
+		float spriteScaleX = newX/currSize.width;
+		float spriteScaleY = newY/currSize.height;
 		
-		int newmaxhor = wasFlat ? maxvert : maxhor;
-		int newmaxvert = wasFlat ? maxhor : maxvert;
+		this._sprite.setScaleX(spriteScaleX);
+	    this._sprite.setScaleY(spriteScaleY);
+	    
+		//Calculate aspect ratios and rotate the sprite based on a comparison between them
+		boolean currAR = currSize.height >= currSize.width;
+		boolean newAR = newSize.height >= newSize.width;
+		this._size = CGSize.make(spriteScaleX*currSize.width, spriteScaleY*currSize.height);
 		
-		//Create a new blocks array
-		Block[][] newBlocksArray = new Block[(int) this._dims.x][(int) this._dims.y];
+		if(currAR != newAR)
+		{
+			this._sprite.setRotation(90.0f);
+			this._size.width = spriteScaleY*currSize.height;
+			this._size.height = spriteScaleX*currSize.width;
+		}
+	}
 		
-		//Map everything into a new array
-		if(orientation == Orientation.Portrait)
-		{
-			for(int i = 0; i < newmaxhor-1; i++) for(int j = 0; j < newmaxvert-1; j++)
-			{
-				newBlocksArray[i][j] = tempArray[i][j];
-			}
-		}
-		else if(orientation == Orientation.IPortrait)
-		{
-			for(int i = newmaxhor-1; i >= 0; i--) for(int j = newmaxvert-1; j >= 0; j--)
-			{
-				newBlocksArray[newmaxhor-1-i][newmaxvert-1-j] = tempArray[i][j];
-			}
-		} 
-		else if (orientation == Orientation.Landscape)
-		{
-			for(int j = newmaxvert-1; j >= 0; j--) for(int i = 0; i < newmaxhor; i++)
-			{
-				newBlocksArray[newmaxvert-1-j][i] = tempArray[i][j];
-			}
-		}
-		else if(orientation == Orientation.ILandscape)
-		{
-			for(int j = 0; j < newmaxvert; j++) for(int i = newmaxhor-1; i >= 0; i--)
-			{
-				newBlocksArray[j][newmaxhor-1-i] = tempArray[i][j];
-			}
-		}
+	//Return a list of sprites based on the current 
+	public void SetupBlocks(ArrayList<BlockConfig> blocks)
+	{
+		float longSideDims = Math.max(this._dims.x, this._dims.y);
+		float shortSideDims = Math.min(this._dims.x, this._dims.y);
+		float longSideSize = Math.max(this._size.width, this._size.height);
+		float shortSideSize = Math.min(this._size.width, this._size.height);
 		
-		this._blocks = newBlocksArray;
-		this._lastOrientation = orientation;  
+		//Set the scale factor of the newly created blocks
+		float newBlockW = shortSideSize/shortSideDims;
+		float newBlockH = longSideSize/longSideDims;
+		CGSize newBlockSize = CGSize.make(newBlockW, newBlockH);
+		
+		//Set the rotation to use for the blocks
+		float newRotation = this.orientationToRotation(this._lastOrientation);
+		
+		//Iterate over the supplied block configurators
+		for(BlockConfig bc : blocks)
+		{
+			//Convert the block configurator into a new Block instancend where it should be placed in the grid
+			Block newBlock = bc.obtainBlock();
+			CGPoint gridPos = bc.getPosition();
+			
+			//Exit the current iteration once it becomes clear the block is outside the virtual grid...
+			if(gridPos.x < 0 || gridPos.x > this._dims.x-1 || gridPos.y < 0 || gridPos.y > this._dims.y-1) continue;
+			
+			//Very very complex calculation for setting the blocks' position (Portrait). 
+			float newPositionX = (newBlockW/2)+(gridPos.x*newBlockW) + (this._sprite.getPosition().x-(this._size.width/2));
+			float newPositionY = (-newBlockH/2)+(-gridPos.y*newBlockH) + (this._sprite.getPosition().y+(this._size.height/2));
+			
+			//Resize and reposition the newly created block
+			newBlock.resize(newBlockSize);
+			newBlock.getSprite().setPosition(newPositionX, newPositionY);
+			newBlock.getSprite().setRotation(newRotation);
+			
+			//Add the block to the grid
+			this._blocks[(int)gridPos.x][(int)gridPos.y] = newBlock;
+		}
 	}
 	
-	//Remove a block from the grid
-	public void removeBlock(Block bl)
+	//Calculate a rotation according to an orientation enumeration value
+	public float orientationToRotation(Orientation orientation)
 	{
-		
+		switch(orientation)
+		{
+			case IPortrait:
+				return 180.0f;
+			case Landscape:
+				return 90.0f;
+			case ILandscape:
+				return 270.0f;
+			default:
+				return 0.0f;
+		}
 	}
 	
-	//Check if all blocks are idle and not falling
-	public boolean allBlocksIdle()
+	//Decide what blocks need to fall
+	public void blocksToFall()
 	{
-		return true;
+		//Decide on a number to use for checking the field's virtual grid 
+		int checkAddI = 0;
+		int checkAddJ = 0;
+		
+		switch(this._lastOrientation)
+		{
+			case IPortrait:
+				checkAddJ--;
+				break;
+			case Landscape:
+				checkAddI--;
+				break;
+			case ILandscape:
+				checkAddI++;
+				break;
+			default:
+				checkAddJ++;
+				break;
+		}
+		
+		//Iterate over the grid; when a block is detected, check a neighbouring square based on screen orientation
+		for(int i = 0; i < this._blocks.length; i++) for(int j = 0; j < this._blocks[i].length; j++)
+		{
+			if(this._blocks[i][j] != null && checkAddI+i <= (this._dims.x-1) && checkAddI+i >= 0 && checkAddJ+j <= (this._dims.y-1) && checkAddJ+j >= 0)
+			{
+				if(this._blocks[i+checkAddI][j+checkAddJ] == null)
+				{
+					Block blockToMove = this._blocks[i][j];
+					
+					CCMoveTo actionMove = CCMoveTo.action(0.4f, CGPoint.ccp(
+						blockToMove.getSprite().getPosition().x+(blockToMove.getActualSize().width*checkAddI), 
+						blockToMove.getSprite().getPosition().y-(blockToMove.getActualSize().height*checkAddJ)));
+				    CCCallFuncN actionMoveDone = CCCallFuncND.action(this, "blockFallen", blockToMove);
+				    CCSequence actions = CCSequence.actions(actionMove, actionMoveDone);
+				    
+				    blockToMove.setStoredCoord(CGPoint.ccp(i+checkAddI, j+checkAddJ));
+				    this._blocks[i][j] = null;
+				    
+				    blockToMove.getSprite().runAction(actions);
+				    this._falling++;
+				}
+			}
+		}
+		
+		if(this._falling == 0) this.checkCombination();
+	}
+	
+	//Callback method after a block has moved to a new position
+	public void blockFallen(Object sender, Object d)
+	{
+		this._falling--;
+		
+		//Move the block to its new position in the array
+		Block block = (Block)d;
+		CGPoint grTarget = block.getStoredCoord(); 
+		this._blocks[(int)grTarget.x][(int)grTarget.y] = block;
+		
+		if(this._falling == 0) this.blocksToFall();
+	}
+	
+	//Remove blocks from the grid
+	public void removeBlocks(boolean[][] removeMap)
+	{
+		for(int i = 0; i < removeMap.length; i++) for(int j = 0; j < removeMap[i].length; j++)
+		{
+			if(removeMap[i][j] && this._blocks[i][j] != null)
+			{ 
+				this._blocks[i][j].getSprite().removeFromParentAndCleanup(true);
+				this._blocks[i][j] = null;
+			}
+		}
+		
+		//Now that all blocks have been removed that should be removed, check if more needs to fall...
+		this.blocksToFall();
 	}
 	
 	//Check if there is a combination within the grid
-	public boolean checkCombination()
+	public void checkCombination()
 	{
-		return false;
+		//Construct new array containing the blocks that belong to a match
+		boolean[][] matchMap = new boolean[(int)this._dims.x][(int)this._dims.y];
+		int totalScore = 0;
+		int totalCombo = 1;
+		
+		//MAKE THIS A CONSTANT LATER...
+		int defScore = 100;
+		int defScoreAdd = 50;
+		
+		//Search through columns for matches
+		for(int i = 0; i < this._blocks.length; i++)
+		{
+			int found = 0;
+			AlienType lastType = AlienType.Alex;
+			
+			for(int j = 0; j < this._blocks[i].length; j++)
+			{
+				if(this._blocks[i][j] != null)
+				{
+					Block currBlock = this._blocks[i][j];
+					
+					if(found == 0) lastType = currBlock.getType();
+					else if(lastType != currBlock.getType())
+					{
+						found = 0;
+						lastType = currBlock.getType();
+					}
+					
+					found++;
+					
+					if(found == 3)
+					{
+						matchMap[i][j] = matchMap[i][j-1] = matchMap[i][j-2] = true;
+						totalScore += defScore*totalCombo;
+						totalCombo++;
+					}
+					else if(found > 3)
+					{
+						matchMap[i][j] = true;
+						totalScore += defScoreAdd*(totalCombo-1);
+					}
+				} else found = 0;
+			}
+		}
+		
+		//Search through rows for matches
+		for(int k = 0; k < this._blocks[0].length; k++)
+		{
+			int found = 0;
+			AlienType lastType = AlienType.Alex;
+			
+			for(int l = 0; l < this._blocks.length; l++)
+			{
+				if(this._blocks[l][k] != null)
+				{
+					Block currBlock = this._blocks[l][k];
+					
+					if(found == 0) lastType = currBlock.getType();
+					else if(lastType != currBlock.getType())
+					{
+						found = 0;
+						lastType = currBlock.getType();
+					}
+					
+					found++;
+					
+					if(found == 3)
+					{
+						matchMap[l][k] = matchMap[l-1][k] = matchMap[l-2][k] = true;
+						totalScore += defScore*totalCombo;
+						totalCombo++;
+					}
+					else if(found > 3)
+					{
+						matchMap[l][k] = true;
+						totalScore += defScoreAdd*(totalCombo-1);
+					}
+				} else found = 0;
+			}
+		}
+		
+		//Score
+		Log.d("TOTAL COMBO", ""+totalCombo);
+		Log.d("TOTAL SCORE", ""+totalScore);
+		
+		if(totalScore == 0)
+			this.CombinationPossible();
+		else
+			this.removeBlocks(matchMap);
 	}
 	
 	//Check if there are still any possible combinations on the grid
-	public boolean CombinationPossible()
+	public void CombinationPossible()
 	{
-		return true;
+		//Notify everything that is observing the block field atm
+		this.setChanged();
+		this.notifyObservers("donechecking");
 	}
 	
 	//Check if there is a block next to the target block in the indicated space (left or right)
