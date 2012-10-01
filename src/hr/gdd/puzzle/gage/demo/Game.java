@@ -2,7 +2,6 @@ package hr.gdd.puzzle.gage.demo;
 
 import java.util.ArrayList;
 
-import org.cocos2d.layers.CCLayer;
 import org.cocos2d.layers.CCScene;
 import org.cocos2d.nodes.CCDirector;
 import org.cocos2d.opengl.CCGLSurfaceView;
@@ -11,10 +10,12 @@ import org.cocos2d.types.CGPoint;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class Game extends Activity {
+public class Game extends Activity
+{
 	//Constants
 	private static final int DEF_LTIME = 60;
 	
@@ -42,6 +43,7 @@ public class Game extends Activity {
         
         //Create a new CCGLSurfaceView instance and make it the content window for the game
         _glSurfaceView = new CCGLSurfaceView(this);
+        
         setContentView(_glSurfaceView);
     }
     
@@ -74,6 +76,16 @@ public class Game extends Activity {
         blocksL1.add(new BlockConfig(CGPoint.ccp(0, 7), AlienType.Brain, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(0, 8), AlienType.Brain, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Rocky, afac));
+        /*blocksL1.add(new BlockConfig(CGPoint.ccp(2, 0), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 1), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 2), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 3), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 4), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 5), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 6), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 7), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 8), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 9), AlienType.Brain, afac));*/
         
         //Create the display elements to be used in the level
         ArrayList<PGButton> normalButtons = new ArrayList<PGButton>();
@@ -84,7 +96,7 @@ public class Game extends Activity {
         BlockField normalField = new BlockField(CGPoint.ccp(6, 10));
         
         //Create the levels
-        Level newLevel1 = new Level(normalBack, normalField, normalDisplay, this);
+        Level newLevel1 = new Level(normalBack, normalField, normalDisplay, this._glSurfaceView);
         
         //Add the configurators to the level
         newLevel1.addConfig(blocksL1);
@@ -145,7 +157,8 @@ public class Game extends Activity {
 		levelScene.addChild(currLevel);
 		
 		//Put the newly added level in its setup phase, passing along a screen orientation
-		currLevel.setup(Orientation.IPortrait);
+		//currLevel.setup(Orientation.IPortrait);
+		currLevel.delayedSetup();
 		
 		//Run the scene containing the newly added level
 		CCDirector.sharedDirector().runWithScene(levelScene);

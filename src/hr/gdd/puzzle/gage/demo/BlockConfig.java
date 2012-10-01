@@ -2,7 +2,9 @@ package hr.gdd.puzzle.gage.demo;
 
 import org.cocos2d.types.CGPoint;
 
-public class BlockConfig 
+import android.view.View;
+
+public class BlockConfig
 {
 	//Fields
 	private CGPoint _position;

@@ -8,17 +8,15 @@ import org.cocos2d.actions.CCTimer;
 import org.cocos2d.layers.CCLayer;
 import org.cocos2d.nodes.CCDirector;
 import org.cocos2d.nodes.CCSprite;
+import org.cocos2d.types.CGPoint;
 import org.cocos2d.types.CGSize;
 
 import android.content.Context;
-import android.util.Log;
-import android.view.MotionEvent;
+import android.view.View;
 
 public class Level extends CCLayer implements Observer
 {
 	//-----------------Fields
-	private int _startTime;
-	private int _currTime;
 	private CCTimer _timer;
 	private LevelPhase _state; 
 	private LevelPhase _lastState;
@@ -31,19 +29,24 @@ public class Level extends CCLayer implements Observer
 	private CGSize _screenBounds;
 	private Context _context;
 	private Orientation _currOrientation;
-	private CCTimer _orientationTimer;
+	
+	private Control _control;
 	
 	//-----------------Level constructor
-	public Level(Background bg, BlockField bf, PGDisplay d, Context c)
+	public Level(Background bg, BlockField bf, PGDisplay d, View v)
 	{
 		this._back = bg;
 		this._field = bf;
 		this._displ = d;
-		this._context = c;
+		this._context = v.getContext();
 		
 		this._config = new ArrayList<BlockConfig>();
 		this._screenBounds = CCDirector.sharedDirector().displaySize();
-		this.setIsTouchEnabled(true);
+		
+		//Create the control instance (needs to be activated before sensors can be used)
+		this._control = new Control(v);
+		this._control.addObserver(this);
+		this._control.activateSensors();
 		
 		//Add the level as an observer to the block field
 		this._field.addObserver(this);
@@ -92,12 +95,6 @@ public class Level extends CCLayer implements Observer
 		return this._timer;
 	}
 	
-	//Obtain the current application orientation
-	public Orientation getScreenOrientation()
-	{
-		return Orientation.Portrait;
-	}
-	
 	//-----------------Setter methods
 	//Overload for setting the display interface only
 	public void setDisplay(PGDisplay display)
@@ -144,42 +141,6 @@ public class Level extends CCLayer implements Observer
 	}
 	
 	//-----------------Other methods
-	//Check if a touch start event has been invoked on the level layer
-	public boolean ccIsTouchedStart(MotionEvent event)
-	{
-		return true;
-	}
-	
-	//Check if a touch move event has been invoked on the level layer
-	public boolean ccIsTouchedMove(MotionEvent event)
-	{
-		return true;
-	}
-	
-	//Check if a touch end event has been invoked on the level layer
-	public boolean ccIsTouchedEnd(MotionEvent event)
-	{
-		return true;
-	}
-	
-	//Check the general direction of a swipe and return one of the possible swipe orientations
-	public SwipeDirection getHorSwipe(MotionEvent event)
-	{
-		return SwipeDirection.Left;
-	}
-	
-	//Detect whether the current game orientation matches the level orientation 
-	public boolean orientationChanged()
-	{
-		return false;
-	}
-	
-	//Set the level orientation timer in order to change the level orientation if it is still different at the end of the timer
-	public void setOrientationTimer(CCTimer t)
-	{
-		this._orientationTimer = t;
-	}
-
 	//Add a block configurator to the level 
 	public void addConfig(BlockConfig c)
 	{
@@ -190,6 +151,19 @@ public class Level extends CCLayer implements Observer
 	public void addConfig(ArrayList<BlockConfig> bc)
 	{
 		this._config.addAll(bc);
+	}
+	
+	//Delaying setup simply works?
+	public void delayedSetup()
+	{
+		this.schedule("timercall", 1.0f);
+	}
+	
+	public void timercall(float dt)
+	{
+		this.unschedule("timercall");
+		
+		this.setup(Orientation.Portrait);
 	}
 	
 	//Start the setup phase of the level and load its components
@@ -224,14 +198,52 @@ public class Level extends CCLayer implements Observer
 	
 	@Override
 	public void update(Observable observable, Object data) {
-		String message = data.toString();
+		EventData ed = (EventData) data;
 		
-		if(message == "donechecking") 
+		switch(ed.getType())
 		{
-			if(this._state == LevelPhase.Setup) 
-				this.startLevel();
-			else 
-				this._state = LevelPhase.Playing;
+			case DoneChecking:
+				if(this._state == LevelPhase.Setup) 
+					this.startLevel();
+				else if(this._currOrientation != this._control.getLastChangedOrientation())
+				{
+					this._state = LevelPhase.Checking;
+					this._currOrientation = this._control.getLastChangedOrientation();
+					this._field.setOrientation(this._currOrientation);
+					this._field.blocksToFall();
+				}
+				else this._state = LevelPhase.Playing;
+				break;
+			case OrientationChanged:
+				if(this._state == LevelPhase.Playing)
+				{
+					this._state = LevelPhase.Checking;
+					this._currOrientation = (Orientation)ed.getDataByKey("neworientation");
+					this._field.setOrientation(this._currOrientation);
+					this._field.blocksToFall();
+				}
+				break;
+			case TouchDown:
+				if(this._state == LevelPhase.Playing)
+				{
+					CGPoint p = (CGPoint)ed.getDataByKey("touchedlocation");
+					
+					//Use the point to check if a block has been pressed
+				}
+				break;
+			case TouchSwiped:
+				if(this._state == LevelPhase.Playing)
+				{
+					SwipeDirection dir = (SwipeDirection)ed.getDataByKey("swipedirection");
+					
+					//Handle the direction of Left or Right
+				}
+				break;
+			case TouchUp:
+				//Decide what to do whenever the touch has been released...
+				break;
+			default:
+				break;
 		}
 	}
 	
@@ -269,15 +281,17 @@ public class Level extends CCLayer implements Observer
 	public void startLevel()
 	{
 		this._state = LevelPhase.Playing;
-		
-		//Test with new orientation
-		this._field.setOrientation(Orientation.Landscape);
-		this._field.blocksToFall();
+		this._control.addEvent(EventType.OrientationChanged);
+		this._control.addEvent(EventType.TouchDown);
+		this._control.addEvent(EventType.TouchSwiped);
+		this._control.addEvent(EventType.TouchUp);
 	}
 	
 	//What to do with the level if the game is paused/stopped
 	public void pause()
 	{
+		this._control.deactivateSensors();
+		this._control.toggleEvents(false);
 		this._lastState = this._state;
 		this._state = LevelPhase.Paused;
 	}
@@ -285,6 +299,12 @@ public class Level extends CCLayer implements Observer
 	//What to do when the level is resumed
 	public void resume()
 	{
+		if(this._lastState == LevelPhase.Playing)
+		{
+			this._control.activateSensors();
+			this._control.toggleEvents(true);
+		}
+		
 		this._state = this._lastState;
 	}
 	

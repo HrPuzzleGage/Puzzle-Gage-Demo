@@ -370,7 +370,7 @@ public class BlockField extends Observable
 	{
 		//Notify everything that is observing the block field atm
 		this.setChanged();
-		this.notifyObservers("donechecking");
+		this.notifyObservers(new EventData(EventType.DoneChecking));
 	}
 	
 	//Check if there is a block next to the target block in the indicated space (left or right)

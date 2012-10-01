@@ -13,7 +13,8 @@ enum Orientation
 enum SwipeDirection
 {
 	Left,
-	Right
+	Right,
+	None
 }
 
 //-----------------Enumeration for level phases
@@ -33,4 +34,15 @@ enum AlienType
 	Brain,
 	Crazy,
 	Rocky
+}
+
+//-----------------Enumeration for event types
+enum EventType
+{
+	DoneChecking,
+	OrientationChanged,
+	OrientationFound,
+	TouchDown,
+	TouchSwiped,
+	TouchUp
 }
