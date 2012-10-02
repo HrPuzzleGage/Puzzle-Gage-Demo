@@ -63,7 +63,127 @@ public class Game extends Activity
         
         //Block configurators list
         ArrayList<BlockConfig> blocksL1 = new ArrayList<BlockConfig>();
-        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 0), AlienType.Crazy, afac));
+        
+        //Level 1: (in 1 swipe)
+        /*blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 9), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 9), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 9), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 9), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 9), AlienType.Rocky, afac));*/
+        
+        //Level2: (in 1 swipe)
+        /*blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 9), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 9), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 9), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 9), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 9), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 8), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 8), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 8), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 8), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 8), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 7), AlienType.Alex, afac));*/
+        
+        //Level 3: (in 1 swipe)
+        /*blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 9), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 9), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 9), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 9), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 9), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 8), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 8), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 8), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 8), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 8), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 8), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 7), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 7), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 7), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 7), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 7), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 7), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 6), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 6), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 6), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 6), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 6), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 6), AlienType.Rocky, afac));*/
+        
+        //Level 4: (in 4 swipes)
+        /*blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 9), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 9), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 9), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 9), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 9), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 8), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 8), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 8), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 8), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 8), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 8), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 7), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 7), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 7), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 7), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 7), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 7), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 6), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 6), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 6), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 6), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 6), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 6), AlienType.Rocky, afac));*/
+        
+        // level 5:
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 9), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 9), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 9), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 9), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 9), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 8), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 8), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 8), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 8), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 8), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 8), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 7), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 7), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 7), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 7), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 7), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 7), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 6), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 6), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 6), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 6), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 6), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 6), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 5), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 5), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 5), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 5), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 5), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 5), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 4), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(1, 4), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 4), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 4), AlienType.Crazy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 4), AlienType.Daisy, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 4), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 3), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 3), AlienType.Alex, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(4, 3), AlienType.Brain, afac));
+
+        
+        
+        
+        
+        /*blocksL1.add(new BlockConfig(CGPoint.ccp(0, 0), AlienType.Crazy, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Crazy, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(5, 0), AlienType.Daisy, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(5, 9), AlienType.Daisy, afac));
@@ -75,7 +195,9 @@ public class Game extends Activity
         blocksL1.add(new BlockConfig(CGPoint.ccp(0, 6), AlienType.Brain, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(0, 7), AlienType.Brain, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(0, 8), AlienType.Brain, afac));
-        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Rocky, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Rocky, afac));*/
+        
+        
         /*blocksL1.add(new BlockConfig(CGPoint.ccp(2, 0), AlienType.Brain, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(2, 1), AlienType.Brain, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(2, 2), AlienType.Brain, afac));
