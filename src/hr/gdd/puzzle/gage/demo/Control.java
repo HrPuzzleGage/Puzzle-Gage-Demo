@@ -217,7 +217,7 @@ public class Control extends Observable implements SensorEventListener, OnTouchL
 			case MotionEvent.ACTION_UP:
 				//Erase any values involved in the touch move and notify any observers that the user no longer touches the screen
 				this._prevTouch = null;
-				this.notifyObservers(new EventData(EventType.TouchSwiped));
+				this.notifyObservers(new EventData(EventType.TouchUp));
 				
 				break;
 			default:

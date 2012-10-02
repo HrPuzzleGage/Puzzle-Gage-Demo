@@ -46,3 +46,11 @@ enum EventType
 	TouchSwiped,
 	TouchUp
 }
+
+//-----------------Enumeration for blockfield switch states
+enum SwitchState
+{
+	None,
+	Switching,
+	ISwitching
+}

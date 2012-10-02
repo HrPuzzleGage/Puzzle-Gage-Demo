@@ -57,13 +57,13 @@ public abstract class Block
 	//Select the block
 	public void select()
 	{
-		
+		this._sprite.setOpacity(65);
 	}
 	
 	//Deselect the block
 	public void unselect()
 	{
-		
+		this._sprite.setOpacity(255);
 	}
 	
 	//Abstract methods to be implemented by subclasses
