@@ -1,67 +1,94 @@
 package hr.gdd.puzzle.gage.demo;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
+import org.cocos2d.nodes.CCLabel;
+import org.cocos2d.nodes.CCNode;
 import org.cocos2d.nodes.CCSprite;
 import org.cocos2d.types.CGPoint;
-import org.cocos2d.types.CGSize;
+import org.cocos2d.types.ccColor3B;
 
-public class PGDisplay
+public class PGDisplay extends SpriteWrapper
 {
-	//Fields
-	private ArrayList<PGButton> _buttons;
-	private CCSprite _sprite;
+	private ButtonBox _buttonBox;
+	private LinkedHashMap<CCLabel, DisplayLabel> _labels;
+	private CCNode _labelContainer;
 	
-	//Constructor
-	public PGDisplay(ArrayList<PGButton> buttons)
+	/*
+	 * Constructor: Will load the interface's default sprite and adds the provided buttons
+	 */
+	public PGDisplay(ArrayList<PGButton> buttons, LinkedHashMap<CCLabel, DisplayLabel> labels)
 	{
-		//Set the texture
-		this._sprite = CCSprite.sprite("interface.png");
-		this._sprite.setAnchorPoint(0.0f, 1.0f);
+		this._sprite = CCSprite.sprite("interface_back.bmp");
+		this._sprite.setAnchorPoint(0.5f, 0.5f);
+		this._buttonBox = new ButtonBox(buttons);
+		this._labels = labels;
+		this._labelContainer = CCNode.node();
+	}
+	
+	/*
+	 * Override the SpriteWrapper cleanSprite() method to remove all display objects involved in the display
+	 */
+	@Override
+	public void cleanSprite()
+	{
+		super.cleanSprite();
+		this._buttonBox.getButtonContainer().removeFromParentAndCleanup(true);
+		for(CCLabel l : this._labels.keySet())
+		{
+			l.setString("0");
+			l.removeFromParentAndCleanup(true);
+		}
+	}
+	
+	public ButtonBox getButtonBox()
+	{
+		return this._buttonBox;
+	}
+	
+	public void addLabel(CCLabel label, DisplayLabel dl)
+	{
+		this._labels.put(label, dl);
+	}
+	
+	public CCNode getLabelBox()
+	{
+		return this._labelContainer;
+	}
+	
+	public void positionLabels(CGPoint pos, float dir)
+	{
+		this._labelContainer.removeAllChildren(true);
+		this._labelContainer.setPosition(pos);
+		this._labelContainer.setRotation(0.0f);
 		
-		this._buttons = buttons;
+		float currX = 0;
+		float currY = 0;
+		//boolean started = false;
+		
+		for(CCLabel l : this._labels.keySet())
+		{
+			l.setAnchorPoint(0.0f, 1.0f);
+			l.setPosition(currX, currY);
+			this._labelContainer.addChild(l);
+			
+			currY -= l.getContentSize().height;
+		}
+		
+		this._labelContainer.setRotation(dir);
 	}
 	
-	//Set the size to a desired width
-	public void resizeDisplay(CGSize theSize)
+	public void modifyLabelsTextByType(DisplayLabel type, String newText)
 	{
-		float newWidth = theSize.width;
-	    float newHeight = theSize.height;
-	    float startWidth = this._sprite.getContentSize().width;
-	    float startHeight = this._sprite.getContentSize().height;
-	    float newScaleX = newWidth/startWidth;
-	    float newScaleY = newHeight/startHeight;
-
-	    this._sprite.setScaleX(newScaleX);
-	    this._sprite.setScaleY(newScaleY);
-	    this._sprite.setAnchorPoint(0.0f, 1.0f);
+		for(CCLabel l : this._labels.keySet())
+		{
+			if(this._labels.get(l) == type) l.setString(newText); 
+		}
 	}
 	
-	public CGPoint getAbsoluteSize()
+	public void configureAllLabels(ccColor3B col)
 	{
-		return CGPoint.ccp(this._sprite.getScaleX()*this._sprite.getContentSize().width, this._sprite.getScaleY()*this._sprite.getContentSize().height);
-	}
-	
-	//Add a button to the display
-	public void AddButton(PGButton button)
-	{
-		this._buttons.add(button);
-	}
-	
-	//Overload for adding multiple buttons to the display at once
-	public void AddButton(ArrayList<PGButton> buttons) {
-		this._buttons.addAll(buttons);
-	}
-	
-	//Clear all buttons
-	public void ClearButtons()
-	{
-		this._buttons.clear();
-	}
-	
-	//Getter methods
-	public CCSprite getSprite()
-	{
-		return this._sprite;
+		for(CCLabel l : this._labels.keySet()) l.setColor(col);
 	}
 }

@@ -4,20 +4,20 @@ import org.cocos2d.nodes.CCSprite;
 import org.cocos2d.types.CGPoint;
 import org.cocos2d.types.CGSize;
 
-public class Background 
+public class Background extends SpriteWrapper
 {
 	//Fields
-	private CCSprite _sprite;
+	//private CCSprite _sprite;
 	
 	//Constructor
 	public Background()
 	{
-		this._sprite = CCSprite.sprite("backdrop.png");
-		this._sprite.setAnchorPoint(0.0f, 1.0f);
+		this._sprite = CCSprite.sprite("back_gadget2.bmp");
+		this._sprite.setAnchorPoint(0.5f, 0.5f);
 	}
 	
 	//Set the size to a desired width
-	public void resizeBack(CGSize theSize)
+	/*public void resizeBack(CGSize theSize)
 	{
 		float newWidth = theSize.width;
 	    float newHeight = theSize.height;
@@ -28,7 +28,7 @@ public class Background
 
 	    this._sprite.setScaleX(newScaleX);
 	    this._sprite.setScaleY(newScaleY);
-	    this._sprite.setAnchorPoint(0.0f, 1.0f);
+	    this._sprite.setAnchorPoint(0.5f, 0.5f);
 	}
 	
 	public CGPoint getAbsoluteSize()
@@ -39,5 +39,5 @@ public class Background
 	public CCSprite getSprite()
 	{
 		return this._sprite;
-	}
+	}*/
 }

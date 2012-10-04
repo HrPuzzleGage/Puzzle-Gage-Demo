@@ -9,6 +9,16 @@ enum Orientation
 	ILandscape
 }
 
+//-----------------Enumeration for menu labels
+enum DisplayLabel
+{
+	None,
+	Score,
+	Combo, 
+	Time,
+	Moves
+}
+
 //-----------------Enumeration for swipe directions
 enum SwipeDirection
 {
@@ -27,7 +37,7 @@ enum LevelPhase
 }
 
 //-----------------Enumeration for alien types
-enum AlienType
+enum BlockType
 {
 	Alex,
 	Daisy,
@@ -44,7 +54,8 @@ enum EventType
 	OrientationFound,
 	TouchDown,
 	TouchSwiped,
-	TouchUp
+	TouchUp,
+	ScoreUpdate
 }
 
 //-----------------Enumeration for blockfield switch states

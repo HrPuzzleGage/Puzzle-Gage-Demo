@@ -5,7 +5,7 @@ import org.cocos2d.nodes.CCSprite;
 public class AlienBlock extends Block 
 {
 	//Fields
-	private AlienType _type;
+	private BlockType _type;
 	
 	//Constructor
 	public AlienBlock(BlockConfig config)
@@ -44,7 +44,7 @@ public class AlienBlock extends Block
 	
 	//Implemented abstract methods
 	@Override
-	public AlienType getType() {
+	public BlockType getType() {
 		return this._type;
 	}
 }

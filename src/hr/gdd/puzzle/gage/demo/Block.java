@@ -4,56 +4,26 @@ import org.cocos2d.nodes.CCSprite;
 import org.cocos2d.types.CGPoint;
 import org.cocos2d.types.CGSize;
 
-public abstract class Block 
+public abstract class Block extends SpriteWrapper
 {
+	public static float fallTime = 0.4f;
+	public static float switchTime = 0.3f;
+	
 	//Fields
-	protected CCSprite _sprite;
-	protected CGPoint _storedCoord;
+	protected CGPoint _gridCoord;
 	
-	//Move the block using its falling speed
-	public void setStoredCoord(CGPoint point)
+	//Get and set the block's grid coordinations
+	public void setGridCoord(CGPoint point)
 	{
-		this._storedCoord = point;
+		this._gridCoord = point;
 	}
 	
-	public CGPoint getStoredCoord()
+	public CGPoint getGridCoord()
 	{
-		return this._storedCoord;
-	}
-	
-	//Set the size to a desired width
-	public void resize(CGSize theSize)
-	{
-		float newWidth = theSize.width;
-	    float newHeight = theSize.height;
-	    float startWidth = this._sprite.getContentSize().width;
-	    float startHeight = this._sprite.getContentSize().height;
-	    float newScaleX = newWidth/startWidth;
-	    float newScaleY = newHeight/startHeight;
-
-	    this._sprite.setScaleX(newScaleX);
-	    this._sprite.setScaleY(newScaleY);
-	    this._sprite.setAnchorPoint(0.5f, 0.5f);
-	}
-	
-	public CGSize getActualSize()
-	{
-		return CGSize.make(
-			this._sprite.getContentSize().width*this._sprite.getScaleX(),
-			this._sprite.getContentSize().height*this._sprite.getScaleY());
-	}
-	
-	public CCSprite getSprite()
-	{
-		return this._sprite;
+		return this._gridCoord;
 	}
 	
 	//Check, based off of the supplied control, whether the block is touched
-	public boolean isSelected()
-	{
-		return true;
-	}
-	
 	//Select the block
 	public void select()
 	{
@@ -67,5 +37,5 @@ public abstract class Block
 	}
 	
 	//Abstract methods to be implemented by subclasses
-	public abstract AlienType getType();
+	public abstract BlockType getType();
 }

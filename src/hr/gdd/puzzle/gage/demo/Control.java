@@ -94,6 +94,12 @@ public class Control extends Observable implements SensorEventListener, OnTouchL
 		}
 	}
 	
+	//Unsubscribe from all events
+	public void removeAllEvents()
+	{
+		this._subscribedTypes.clear();
+	}
+	
 	//Unregister all sensors associated with the instance
 	public void deactivateSensors()
 	{

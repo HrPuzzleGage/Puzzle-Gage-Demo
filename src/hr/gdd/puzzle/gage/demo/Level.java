@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.cocos2d.actions.CCTimer;
 import org.cocos2d.layers.CCLayer;
 import org.cocos2d.nodes.CCDirector;
 import org.cocos2d.nodes.CCSprite;
 import org.cocos2d.types.CGPoint;
 import org.cocos2d.types.CGSize;
 
-import android.content.Context;
+import android.util.Log;
 import android.view.View;
 
 public class Level extends CCLayer implements Observer
@@ -21,6 +20,8 @@ public class Level extends CCLayer implements Observer
 	private LevelPhase _lastState;
 	private int _score;
 	private int _combo;
+	private int _moves = 0;
+	private int _allowedMoves = 4;
 	private Background _back;
 	private PGDisplay _displ;
 	private BlockField _field;
@@ -41,12 +42,8 @@ public class Level extends CCLayer implements Observer
 		
 		//Create the control instance (needs to be activated before sensors can be used)
 		this._control = new Control(v);
-		this._control.addObserver(this);
 		this._control.activateSensors();
 		this._control.toggleEvents(true);
-		
-		//Add the level as an observer to the block field
-		this._field.addObserver(this);
 	}
 	
 	//-----------------Getter methods
@@ -90,14 +87,7 @@ public class Level extends CCLayer implements Observer
 	//Overload for setting the display interface only
 	public void setDisplay(PGDisplay display)
 	{
-		this.setDisplay(display, null);
-	}
-	
-	//Set the display interface along with all of its buttons
-	public void setDisplay(PGDisplay display, ArrayList<PGButton> buttons)
-	{
 		this._displ = display;
-		if(buttons != null) this._displ.AddButton(buttons);
 	}
 	
 	//Set the level's background instance
@@ -116,12 +106,14 @@ public class Level extends CCLayer implements Observer
 	public void setScore(int score)
 	{
 		this._score = score;
+		this._displ.modifyLabelsTextByType(DisplayLabel.Score, ""+this._score);
 	}
 	
 	//Set the level's current combo
 	public void setCombo(int combo)
 	{
 		this._combo = combo;
+		this._displ.modifyLabelsTextByType(DisplayLabel.Combo, ""+this._combo);
 	}
 	
 	//-----------------Other methods
@@ -140,7 +132,16 @@ public class Level extends CCLayer implements Observer
 	//Delaying setup does work?
 	public void delayedSetup()
 	{
+		//Set the level's phase to its setup phase
+		this._state = LevelPhase.Setup;
+		
 		this.schedule("timercall", 1.0f);
+	}
+	
+	public void moveMade()
+	{
+		this._moves++;
+		this._displ.modifyLabelsTextByType(DisplayLabel.Moves, this._moves+"/"+this._allowedMoves);
 	}
 	
 	//Call for handling the timer
@@ -153,31 +154,29 @@ public class Level extends CCLayer implements Observer
 	//Start the setup phase of the level and load its components
 	public void setup(Orientation orientation)
 	{
-		//Set the level's phase to its setup phase
-		this._state = LevelPhase.Setup;
+		//Add the level as an observer to the instances it needs to receive updates from
+		this._control.addObserver(this);
+		this._field.addObserver(this);
 		
 		//Add background, blockfield and display interface
-		//this.addChild(this._back.getSprite());
+		this.addChild(this._back.getSprite());
 		this.addChild(this._field.getSprite());
-		//this.addChild(this._displ.getSprite());
+		this.addChild(this._displ.getSprite());
 		
 		//Rearrange the location of the elements according to the screen's orientation
-		rearrangeElements(orientation);
+		this.rearrangeElements(orientation);
 		
-		//Set the orientation of the block field to that of the game
-		this._field.setOrientation(orientation);
-		
-		//Setup the blocks
+		//Setup the blocks (which will position them as well)
 		this._field.SetupBlocks(this._config);
 		
 		//Setup the blocks in the block field accordingly, then add the resulting blocks to the level as children
-		for(CCSprite spr : this._field.getBlockSprites())
-		{
-			this.addChild(spr);
-		}
+		for(CCSprite spr : this._field.getBlockSprites()) this.addChild(spr);
+		//for(CCSprite b : this._displ.getButtonBox().getButtonSprites()) this.addChild(b);
+		this.addChild(this._displ.getButtonBox().getButtonContainer());
+		this.addChild(this._displ.getLabelBox());
 		
-		//Make the blocks fall; this will trigger an event when finished
-		this._field.blocksToFall();
+		//Set the orientation of the block field to that of the game
+		this._field.changeFieldOrientation(orientation);
 	}
 	
 	@Override
@@ -191,6 +190,7 @@ public class Level extends CCLayer implements Observer
 			case DoneChecking:    
 				//The level is done checking from the setup phase (the 'initial' check)
 				if(this._state == LevelPhase.Setup) this.startLevel();
+				else this.moveMade();
 				
 				//Change the screen orientation if it changed in the meantime according to the controls
 				if(this._currOrientation != this._control.getLastChangedOrientation())
@@ -198,9 +198,8 @@ public class Level extends CCLayer implements Observer
 					//Change the field's orientation, making blocks fall if needed
 					this._state = LevelPhase.Checking;
 					this._currOrientation = this._control.getLastChangedOrientation();
-					
-					this._field.setOrientation(this._currOrientation);
-					this._field.blocksToFall();
+					this.rearrangeElements(this._currOrientation);
+					this._field.changeFieldOrientation(this._currOrientation);
 				}
 				else this._state = LevelPhase.Playing;
 				
@@ -212,9 +211,8 @@ public class Level extends CCLayer implements Observer
 					//Change the field's orientation, making blocks fall if needed
 					this._state = LevelPhase.Checking;
 					this._currOrientation = (Orientation)ed.getDataByKey("neworientation");
-					
-					this._field.setOrientation(this._currOrientation);
-					this._field.blocksToFall();
+					this.rearrangeElements(this._currOrientation);
+					this._field.changeFieldOrientation(this._currOrientation);
 				}
 				
 				break;
@@ -223,7 +221,19 @@ public class Level extends CCLayer implements Observer
 				{
 					//Use the point provided by the event to set a selected block in the block field
 					CGPoint p = (CGPoint)ed.getDataByKey("touchedlocation");
+					p.y = this._screenBounds.height-p.y;
+					
 					this._field.selectBlockAt(p);
+					String clicked =  this._displ.getButtonBox().buttonClickedAt(p) != null ? this._displ.getButtonBox().buttonClickedAt(p).getIdentifier() : "";
+					
+					if(clicked == "reset")
+						this.resetLevel();
+					else if(clicked == "resign")
+						this.endLevel();
+					else
+					{
+						//Unknown identifier
+					}
 				}
 				
 				break;
@@ -241,6 +251,14 @@ public class Level extends CCLayer implements Observer
 				this._field.clearSwitch();
 				
 				break;
+			case ScoreUpdate:
+				int score = (Integer)ed.getDataByKey("score");
+				int combo = (Integer)ed.getDataByKey("combo");
+				
+				this.setScore(_score+score);
+				this.setCombo(combo);
+				
+				break;
 			default:
 				//When the level receives an event that it has no handler for (but is somehow still subscribed)
 				break;
@@ -253,8 +271,8 @@ public class Level extends CCLayer implements Observer
 		//Percentages that the elements should take up, assuming the longest side of the screen.
 		//Keep in mind: Game is in portrait mode at all times; the orientations are merely based on sensor data.
 		float fieldPaddingPerc = 0.05f;
-		float fieldPerc = 0.65f;
-		float displayPerc = 0.25f;
+		float fieldPerc = 0.7f;
+		float displayPerc = 0.2f;
 		
 		//Padding between the elements
 		float maxFieldPadding = this._screenBounds.height*fieldPaddingPerc;
@@ -269,13 +287,71 @@ public class Level extends CCLayer implements Observer
 		float displaySizeY = this._screenBounds.height*displayPerc;
 		CGSize displaySize = CGSize.make(displaySizeX, displaySizeY);
 		
-		//Starting location of the block field
-		float fieldStartX = this._screenBounds.width/2.0f;
-		float fieldStartY = this._screenBounds.height/2.0f;
+		float backSizeX = this._screenBounds.width;
+		float backSizeY = this._screenBounds.height-displaySizeY;
+		CGSize backSize = CGSize.make(backSizeX, backSizeY);
 		
-		//Set the size and location of the axes
-		this._field.getSprite().setPosition(fieldStartX, fieldStartY);
-		this._field.resizeIndividualAxes(fieldSize, this._field.getSprite().getContentSize(), this._field.getDimensions());
+		//Starting location of the block field
+		float fieldStartX = this._screenBounds.width/2.0f; 
+		float fieldStartY = 0;
+		float displayStartX = this._screenBounds.width/2.0f;
+		float displayStartY = 0;
+		float displayRot = 180;
+		float backStartX = this._screenBounds.width/2.0f;
+		float backStartY = 0;
+		float buttonsStartX = 0;
+		float buttonsStartY = 0;
+		float buttonsRot = 0;
+		CGSize buttonSize = CGSize.make(displaySizeY, displaySizeY);
+		
+		//Change some specific positions and rotations according to the current screen orientation
+		if(orientation == Orientation.Portrait || orientation == Orientation.ILandscape)
+		{
+			fieldStartY = fieldSizeY/2+maxFieldPadding;
+			displayStartY = this._screenBounds.height-(displaySizeY/2);
+			backStartY = backSizeY/2;
+			
+			if(orientation == Orientation.Portrait) buttonsRot = 0.0f;
+			else buttonsRot = 270.0f;
+		} 
+		else
+		{
+			fieldStartY = this._screenBounds.height-(fieldSizeY/2+maxFieldPadding);
+			displayStartY = displaySizeY/2;
+			displayRot = 0;
+			backStartY = this._screenBounds.height-(backSizeY/2);
+			
+			if(orientation == Orientation.IPortrait) buttonsRot = 180.0f;
+			else buttonsRot = 90.0f;
+		}
+		
+		//Set the size and location of the axes		
+		this._field.scaleSizeToPixelsWithConstraint(fieldSize);
+		this._displ.scaleSizeToPixels(displaySize);
+		this._displ.setAngle(displayRot);
+		this._back.scaleSizeToPixels(backSize);
+		this._field.positionField(CGPoint.ccp(fieldStartX, fieldStartY));
+		this._displ.getSprite().setPosition(CGPoint.ccp(displayStartX, displayStartY));
+		this._back.getSprite().setPosition(CGPoint.ccp(backStartX, backStartY));
+		this._displ.getButtonBox().positionScaleButtonSpritesPadding(buttonSize, buttonsRot);
+		
+		//Position elements after initial ones have scaled
+		buttonsStartY = this._displ.getSprite().getPosition().y;
+		this._displ.positionLabels(this._displ.getSprite().getPosition(), buttonsRot);
+		
+		switch(orientation)
+		{
+			case Portrait: case ILandscape:
+				buttonsStartX = this._screenBounds.width-(this._displ.getButtonBox().getSizeWithLastPadding().width/2);
+				break;
+			case IPortrait: case Landscape:
+				buttonsStartX = this._displ.getButtonBox().getSizeWithLastPadding().width/2;
+				break;
+			default:
+				break;
+		}
+		
+		this._displ.getButtonBox().getButtonContainer().setPosition(CGPoint.ccp(buttonsStartX, buttonsStartY));
 	}
 	
 	//Indicates that the player can start playing the level
@@ -286,6 +362,11 @@ public class Level extends CCLayer implements Observer
 		this._control.addEvent(EventType.TouchSwiped);
 		this._control.addEvent(EventType.TouchUp);
 		this._control.addEvent(EventType.OrientationChanged);
+	}
+	
+	public void endLevel()
+	{
+		
 	}
 	
 	//What to do with the level if the game is paused/stopped
@@ -308,6 +389,17 @@ public class Level extends CCLayer implements Observer
 	public void resetLevel()
 	{
 		//Empty level content and reset the timer
+		this._control.removeAllEvents();
+		this._control.deleteObservers();
+		this._field.deleteObservers();
+		this._displ.cleanSprite();
+		this._field.cleanSprite();
+		this._back.cleanSprite();
+		this._score = 0;
+		this._moves = 0;
+		this._combo = 0;
+		
+		this.delayedSetup();
 	}
 	
 	//Game loop

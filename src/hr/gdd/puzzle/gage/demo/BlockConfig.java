@@ -8,11 +8,11 @@ public class BlockConfig
 {
 	//Fields
 	private CGPoint _position;
-	private AlienType _type;
+	private BlockType _type;
 	private IBlockFactory _factoryToUse;
 	
 	//Constructor
-	public BlockConfig(CGPoint pos, AlienType type, IBlockFactory factory)
+	public BlockConfig(CGPoint pos, BlockType type, IBlockFactory factory)
 	{
 		this._position = pos;
 		this._type = type;
@@ -25,7 +25,7 @@ public class BlockConfig
 		return _position;
 	}
 	
-	public AlienType getType() 
+	public BlockType getType() 
 	{
 		return _type;
 	}
@@ -41,7 +41,7 @@ public class BlockConfig
 		this._position = position;
 	}
 
-	public void setType(AlienType type) 
+	public void setType(BlockType type) 
 	{
 		this._type = type;
 	}
