@@ -64,7 +64,7 @@ public class Game extends Activity
         //Block configurators list
         ArrayList<BlockConfig> blocksL1 = new ArrayList<BlockConfig>();
         
-        //Level 1: (in 1 swipe)
+        //Level 1.1: (in 1 swipe)
         /*blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Alex, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(1, 9), AlienType.Alex, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(2, 9), AlienType.Rocky, afac));
@@ -72,7 +72,7 @@ public class Game extends Activity
         blocksL1.add(new BlockConfig(CGPoint.ccp(4, 9), AlienType.Rocky, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(5, 9), AlienType.Rocky, afac));*/
         
-        //Level2: (in 1 swipe)
+        //Level 1.2: (in 1 swipe)
         /*blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Alex, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(1, 9), AlienType.Alex, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(2, 9), AlienType.Crazy, afac));
@@ -86,7 +86,7 @@ public class Game extends Activity
         blocksL1.add(new BlockConfig(CGPoint.ccp(5, 8), AlienType.Alex, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(3, 7), AlienType.Alex, afac));*/
         
-        //Level 3: (in 1 swipe)
+        //Level 1.3: (in 1 swipe)
         /*blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Daisy, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(1, 9), AlienType.Rocky, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(2, 9), AlienType.Daisy, afac));
@@ -112,7 +112,7 @@ public class Game extends Activity
         blocksL1.add(new BlockConfig(CGPoint.ccp(4, 6), AlienType.Daisy, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(5, 6), AlienType.Rocky, afac));*/
         
-        //Level 4: (in 4 swipes)
+        //Level 1.4: (in 4 swipes)
         /*blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Alex, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(1, 9), AlienType.Alex, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(2, 9), AlienType.Crazy, afac));
@@ -138,7 +138,7 @@ public class Game extends Activity
         blocksL1.add(new BlockConfig(CGPoint.ccp(4, 6), AlienType.Rocky, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(5, 6), AlienType.Rocky, afac));*/
         
-        // level 5:
+        // level 1.5: (in 1 swipe en 1 tilt)
         blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Daisy, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(1, 9), AlienType.Rocky, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(2, 9), AlienType.Crazy, afac));
@@ -208,6 +208,16 @@ public class Game extends Activity
         blocksL1.add(new BlockConfig(CGPoint.ccp(2, 7), AlienType.Brain, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(2, 8), AlienType.Brain, afac));
         blocksL1.add(new BlockConfig(CGPoint.ccp(2, 9), AlienType.Brain, afac));*/
+        
+        // level 2.1 (in 1 tilt)
+        /*blocksL1.add(new BlockConfig(CGPoint.ccp(0, 9), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(0, 8), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 9), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 8), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(3, 9), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(2, 8), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 9), AlienType.Brain, afac));
+        blocksL1.add(new BlockConfig(CGPoint.ccp(5, 8), AlienType.Brain, afac));*/
         
         //Create the display elements to be used in the level
         ArrayList<PGButton> normalButtons = new ArrayList<PGButton>();
