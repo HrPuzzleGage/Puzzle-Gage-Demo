@@ -1,1 +1,0 @@
-Er zit geen fps bestand in de /assets folder; bij mij geeft deze een probleem, maar moet gewoon terug te vinden zijn bij elke download van Cocos 2D ~Dave
